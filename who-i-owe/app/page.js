@@ -71,6 +71,8 @@ function Sheet({ children, bottom }) {
       style={{
         bottom,
         background: "var(--card)",
+        maxHeight: "92dvh",
+        overflowY: "auto",
         paddingBottom: "max(env(safe-area-inset-bottom), 20px)",
         boxShadow: "0 -8px 40px rgba(0,0,0,0.18)",
       }}
@@ -82,6 +84,40 @@ function Sheet({ children, bottom }) {
       <div className="mx-auto mb-5 h-[5px] w-9 rounded-full" style={{ background: "var(--label3)" }} />
       {children}
     </motion.div>
+  );
+}
+
+function PayRow({ method }) {
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(method.number);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {}
+  }
+
+  return (
+    <div className="row" style={{ minHeight: 60 }}>
+      <div className="min-w-0 flex-1">
+        <p className="text-[17px] font-medium">{method.name}</p>
+        <p className="tnum truncate text-[15px]" style={{ color: "var(--label2)" }}>
+          {method.number}
+          {method.holder ? ` · ${method.holder}` : ""}
+        </p>
+      </div>
+      <button
+        onClick={copy}
+        className="h-9 shrink-0 rounded-full px-4 text-[15px] font-semibold transition active:opacity-60"
+        style={{
+          background: copied ? "var(--green)" : "var(--fill)",
+          color: copied ? "#fff" : "var(--blue)",
+        }}
+      >
+        {copied ? "Copied" : "Copy"}
+      </button>
+    </div>
   );
 }
 
@@ -144,9 +180,9 @@ export default function Home() {
         }}
       >
         <header className="px-1 pb-7 pt-6">
-          <h1 className="text-[34px] font-bold leading-[1.1] tracking-tight">Who I Owe</h1>
+          <h1 className="text-[34px] font-bold leading-[1.1] tracking-tight">TUMEKUJA KUCHEZA INVOICE</h1>
           <p className="mt-2 text-[17px] leading-snug" style={muted}>
-            Thanks for having my back on the bills. Pick your name to see where we stand.
+            Thanks for the fun we had! Here's a summary of what we owe each other.
           </p>
         </header>
 
@@ -311,6 +347,19 @@ export default function Home() {
               </p>
               <p className="text-[17px] leading-snug">{reveal.message}</p>
             </div>
+
+            {reveal.payments?.length > 0 && (
+              <>
+                <p className="mb-2 mt-6 px-1 text-[13px] uppercase tracking-wide" style={muted}>
+                  Ways to pay
+                </p>
+                <div className="overflow-hidden rounded-[14px]" style={{ background: "var(--fill)" }}>
+                  {reveal.payments.map((m, i) => (
+                    <PayRow key={i} method={m} />
+                  ))}
+                </div>
+              </>
+            )}
 
             <button
               onClick={close}
