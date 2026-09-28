@@ -1,15 +1,13 @@
-import { get } from "@vercel/edge-config";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
     const { id, password } = await req.json();
-
     if (!id || !password) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    const people = (await get("people")) || [];
+    const people = JSON.parse(process.env.PEOPLE || "[]");
     const person = people.find((p) => p.id === id);
 
     if (!person || person.password !== password) {
@@ -22,6 +20,7 @@ export async function POST(req) {
       message: person.message,
     });
   } catch (err) {
+    console.error("reveal route error:", err.message);
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
 }
